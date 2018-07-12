@@ -14,7 +14,7 @@ clear
 clc
 close all
 
-figure3 = 0;  % Setting this to one will do Kendra's version with initial velocity of zero
+figure3 = 1;  % Setting this to one will do Kendra's version with initial velocity of zero
 savefig_true = 0;
 
 %% Dynamics model for the deputy relative to the chief spacecraft
@@ -160,6 +160,7 @@ if ~isEmptySet(underapproximate_stochastic_reach_avoid_polytope_ft)
 else
     underapproximate_stochastic_reach_avoid_polytope_2D_ft = Polyhedron();
 end
+
 %% Plot the underapproximative polytope along with the safe and the target sets.
 % Assuming only vx-vy is fixed
 figure(100);
@@ -170,9 +171,9 @@ plot(target_set.slice([3,4], slice_at_vx_vy), 'color', 'k');
 
 scatter(xmax_ccc(1), xmax_ccc(2), 100,'gs','filled')
 plot(underapproximate_stochastic_reach_avoid_polytope_2D_ccc,...
-     'color','m','alpha',0.5);
+     'color','m','alpha',1);
 plot(underapproximate_stochastic_reach_avoid_polytope_2D_ft,...
-     'color','b','alpha',0.2);
+     'color','b','alpha',0.8);
 leg=legend({'Safe set',...
         'Target set',...
         '$\bar{x}_\mathrm{max}$',...
