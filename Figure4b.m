@@ -2,7 +2,7 @@ clear
 % dropboxpath='D:/Dropbox';
 dropboxpath='/datafiles/Dropbox';
 % Run CWH_example with Figure3=1
-load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/Figure3_8.mat'),...
+load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/Figure4_8.mat'),...
     'safe_set','target_set','xmax_ccc','xmax_ft','slice_at_vx_vy',...
     'vertex_poly_ccc','vertex_poly_ft','optimal_input_vector_at_boundary_points_ccc',...
     'optimal_input_vector_at_boundary_points_ft','optimal_reachAvoid_i_ccc',...
@@ -11,7 +11,7 @@ load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/Figure3_8.mat'),...
     'underapproximate_stochastic_reach_avoid_polytope_2D_ccc',...
     'underapproximate_stochastic_reach_avoid_polytope_2D_ft');
 
-direction_index_to_plot = 46;
+direction_index_to_plot = 41;
 init_state = vertex_poly_ccc(:,direction_index_to_plot);
 %% Plotting a specific one again
 figure(200+direction_index_to_plot)
@@ -42,7 +42,7 @@ for realization_index = traj_indices
         markerString = 'g^-';
     else
         % Assign red asterisk as the marker
-        markerString = 'wd-';
+        markerString = 'wd';
     end
     % Create [x(t_1) x(t_2)... x(t_N)]
     reshaped_X_vector = reshape(...
@@ -60,12 +60,16 @@ for realization_index = traj_indices
              markerString, 'MarkerSize',10);    
             legend_cell{end+1} = 'Good trajectory';
         end
-    elseif strcmp(markerString,'wd-')
+    elseif strcmp(markerString,'wd')
         if red_legend_updated
             h = plot([init_state(1),reshaped_X_vector(1,:)],...
+             [init_state(2),reshaped_X_vector(2,:)],'k');
+            h = plot([init_state(1),reshaped_X_vector(1,:)],...
              [init_state(2),reshaped_X_vector(2,:)],...
-             markerString, 'MarkerSize',10,'MarkerEdgeColor','k', 'MarkerFaceColor','w');
+             markerString, 'MarkerSize',10,'MarkerEdgeColor','k', 'MarkerFaceColor','w');            
         else
+            h = plot([init_state(1),reshaped_X_vector(1,:)],...
+             [init_state(2),reshaped_X_vector(2,:)],'k');
             h6 = plot([init_state(1),reshaped_X_vector(1,:)],...
              [init_state(2),reshaped_X_vector(2,:)],...
              markerString, 'MarkerSize',10,'MarkerEdgeColor','k', 'MarkerFaceColor','w');
@@ -89,9 +93,9 @@ h7 = scatter(...
       30, 'bo', 'filled');
 legend_cell{end+1} = 'Mean trajectory';
 if red_legend_updated
-    leg = legend([h3,h5,h6,h7], legend_cell{:},'Location','NorthEast','interpreter','latex');
+    leg = legend([h3,h5,h6,h7], legend_cell{:},'Location','NorthWest','interpreter','latex');
 else
-    leg = legend([h3,h5,h7], legend_cell{:},'Location','NorthEast','interpreter','latex');
+    leg = legend([h3,h5,h7], legend_cell{:},'Location','NorthWest','interpreter','latex');
 end
 box on;
 grid on;
@@ -99,10 +103,11 @@ axis equal
 xlabel('x')
 ylabel('y')
 set(gca,'FontSize',20)
+axis([-1.2 0.25 -1.2 0.1])
 fprintf(['Open-loop-based lower bound (CC) and Monte-Carlo simulation ',...
                  '(%1.0e particles): %1.3f, %1.3f\n'],...
                 n_mcarlo_sims,...
                 optimal_reachAvoid_i_ccc(direction_index_to_plot),...
                 sum(mcarlo_result)/n_mcarlo_sims);
-savefig(gcf,'MATLAB_figs/CWH_example_Figure3b.fig','compact');
-saveas(gcf,'MATLAB_figs/CWH_example_Figure3b.png');
+savefig(gcf,'MATLAB_figs/CWH_example_Figure4b.fig','compact');
+saveas(gcf,'MATLAB_figs/CWH_example_Figure4b.png');
