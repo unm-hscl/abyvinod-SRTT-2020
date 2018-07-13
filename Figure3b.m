@@ -1,6 +1,8 @@
 clear
 % dropboxpath='D:/Dropbox';
+% fontSize=20;
 dropboxpath='/datafiles/Dropbox';
+fontSize=40;
 % Run CWH_example with Figure3=1
 load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/Figure3_8.mat'),...
     'safe_set','target_set','xmax_ccc','xmax_ft','slice_at_vx_vy',...
@@ -19,8 +21,8 @@ clf
 hold on;
 h1=plot(safe_set.slice([3,4], slice_at_vx_vy), 'color', 'y');
 h2=plot(target_set.slice([3,4], slice_at_vx_vy), 'color', 'k');
-h14=plot(underapproximate_stochastic_reach_avoid_polytope_2D_ft, 'color','b','alpha',1);
-h4=plot(underapproximate_stochastic_reach_avoid_polytope_2D_ccc, 'color','m','alpha',0.5);
+% h14=plot(underapproximate_stochastic_reach_avoid_polytope_2D_ft, 'color','b','alpha',1);
+h4=plot(underapproximate_stochastic_reach_avoid_polytope_2D_ccc, 'color','m','alpha',1);
 h3=scatter(init_state(1), init_state(2), 200,'cs','filled');
 legend_cell = {'Initial state'};
 concat_state_realization = generateMonteCarloSims(...
@@ -42,7 +44,7 @@ for realization_index = traj_indices
         markerString = 'g^-';
     else
         % Assign red asterisk as the marker
-        markerString = 'wd-';
+        markerString = 'wd';
     end
     % Create [x(t_1) x(t_2)... x(t_N)]
     reshaped_X_vector = reshape(...
@@ -52,23 +54,27 @@ for realization_index = traj_indices
         if green_legend_updated
             h = plot([init_state(1),reshaped_X_vector(1,:)],...
              [init_state(2),reshaped_X_vector(2,:)],...
-             markerString, 'MarkerSize',10);
+             markerString, 'MarkerSize',fontSize/2,'MarkerEdgeColor','k','MarkerFaceColor','g');
         else
             green_legend_updated = 1;
             h5 = plot([init_state(1),reshaped_X_vector(1,:)],...
              [init_state(2),reshaped_X_vector(2,:)],...
-             markerString, 'MarkerSize',10);    
+             markerString, 'MarkerSize',fontSize/2,'MarkerEdgeColor','k','MarkerFaceColor','g');    
             legend_cell{end+1} = 'Good trajectory';
         end
-    elseif strcmp(markerString,'wd-')
+    elseif strcmp(markerString,'wd')
         if red_legend_updated
             h = plot([init_state(1),reshaped_X_vector(1,:)],...
+             [init_state(2),reshaped_X_vector(2,:)],'k');
+            h = plot([init_state(1),reshaped_X_vector(1,:)],...
              [init_state(2),reshaped_X_vector(2,:)],...
-             markerString, 'MarkerSize',10,'MarkerEdgeColor','k', 'MarkerFaceColor','w');
+             markerString, 'MarkerSize',fontSize/2,'MarkerEdgeColor','k', 'MarkerFaceColor','w');
         else
+            h = plot([init_state(1),reshaped_X_vector(1,:)],...
+             [init_state(2),reshaped_X_vector(2,:)],'k');
             h6 = plot([init_state(1),reshaped_X_vector(1,:)],...
              [init_state(2),reshaped_X_vector(2,:)],...
-             markerString, 'MarkerSize',10,'MarkerEdgeColor','k', 'MarkerFaceColor','w');
+             markerString, 'MarkerSize',fontSize/2,'MarkerEdgeColor','k', 'MarkerFaceColor','w');
             red_legend_updated = 1;
             legend_cell{end+1} = 'Bad trajectory';
         end
@@ -86,7 +92,7 @@ optimal_mean_trajectory=reshape(optimal_mean_X,sys.state_dim,[]);
 h7 = scatter(...
       [init_state(1), optimal_mean_trajectory(1,:)],...
       [init_state(2), optimal_mean_trajectory(2,:)],...
-      30, 'bo', 'filled');
+      fontSize*2, 'bo', 'filled');
 legend_cell{end+1} = 'Mean trajectory';
 if red_legend_updated
     leg = legend([h3,h5,h6,h7], legend_cell{:},'Location','NorthEast','interpreter','latex');
@@ -96,13 +102,15 @@ end
 box on;
 grid on;
 axis equal
+axis([-2.5 2.5 -2 0]);
 xlabel('x')
 ylabel('y')
-set(gca,'FontSize',20)
+set(gca,'FontSize',fontSize)
 fprintf(['Open-loop-based lower bound (CC) and Monte-Carlo simulation ',...
                  '(%1.0e particles): %1.3f, %1.3f\n'],...
                 n_mcarlo_sims,...
                 optimal_reachAvoid_i_ccc(direction_index_to_plot),...
                 sum(mcarlo_result)/n_mcarlo_sims);
-savefig(gcf,'MATLAB_figs/CWH_example_Figure3b.fig','compact');
-saveas(gcf,'MATLAB_figs/CWH_example_Figure3b.png');
+
+% savefig(gcf,'MATLAB_figs/CWH_example_Figure3b.fig','compact');
+% saveas(gcf,'MATLAB_figs/CWH_example_Figure3b.png');

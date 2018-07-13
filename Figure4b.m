@@ -1,6 +1,8 @@
 clear
 % dropboxpath='D:/Dropbox';
+% fontSize=20;
 dropboxpath='/datafiles/Dropbox';
+fontSize=30;
 % Run CWH_example with Figure3=1
 load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/Figure4_8.mat'),...
     'safe_set','target_set','xmax_ccc','xmax_ft','slice_at_vx_vy',...
@@ -19,8 +21,8 @@ clf
 hold on;
 h1=plot(safe_set.slice([3,4], slice_at_vx_vy), 'color', 'y');
 h2=plot(target_set.slice([3,4], slice_at_vx_vy), 'color', 'k');
-h14=plot(underapproximate_stochastic_reach_avoid_polytope_2D_ft, 'color','b','alpha',1);
-h4=plot(underapproximate_stochastic_reach_avoid_polytope_2D_ccc, 'color','m','alpha',0.5);
+% h14=plot(underapproximate_stochastic_reach_avoid_polytope_2D_ft, 'color','b','alpha',1);
+h4=plot(underapproximate_stochastic_reach_avoid_polytope_2D_ccc, 'color','m','alpha',1);
 h3=scatter(init_state(1), init_state(2), 200,'cs','filled');
 legend_cell = {'Initial state'};
 concat_state_realization = generateMonteCarloSims(...
@@ -52,12 +54,12 @@ for realization_index = traj_indices
         if green_legend_updated
             h = plot([init_state(1),reshaped_X_vector(1,:)],...
              [init_state(2),reshaped_X_vector(2,:)],...
-             markerString, 'MarkerSize',10);
+             markerString, 'MarkerSize',fontSize/2,'MarkerEdgeColor','k','MarkerFaceColor','g');
         else
             green_legend_updated = 1;
             h5 = plot([init_state(1),reshaped_X_vector(1,:)],...
              [init_state(2),reshaped_X_vector(2,:)],...
-             markerString, 'MarkerSize',10);    
+             markerString, 'MarkerSize',fontSize/2,'MarkerEdgeColor','k','MarkerFaceColor','g');    
             legend_cell{end+1} = 'Good trajectory';
         end
     elseif strcmp(markerString,'wd')
@@ -66,13 +68,13 @@ for realization_index = traj_indices
              [init_state(2),reshaped_X_vector(2,:)],'k');
             h = plot([init_state(1),reshaped_X_vector(1,:)],...
              [init_state(2),reshaped_X_vector(2,:)],...
-             markerString, 'MarkerSize',10,'MarkerEdgeColor','k', 'MarkerFaceColor','w');            
+             markerString, 'MarkerSize',fontSize/2,'MarkerEdgeColor','k', 'MarkerFaceColor','w');
         else
             h = plot([init_state(1),reshaped_X_vector(1,:)],...
              [init_state(2),reshaped_X_vector(2,:)],'k');
             h6 = plot([init_state(1),reshaped_X_vector(1,:)],...
              [init_state(2),reshaped_X_vector(2,:)],...
-             markerString, 'MarkerSize',10,'MarkerEdgeColor','k', 'MarkerFaceColor','w');
+             markerString, 'MarkerSize',fontSize/2,'MarkerEdgeColor','k', 'MarkerFaceColor','w');
             red_legend_updated = 1;
             legend_cell{end+1} = 'Bad trajectory';
         end
@@ -102,12 +104,13 @@ grid on;
 axis equal
 xlabel('x')
 ylabel('y')
-set(gca,'FontSize',20)
-axis([-1.2 0.25 -1.2 0.1])
+set(gca,'FontSize',fontSize)
+axis([-1.2 0.25 -1.125 0.1])
 fprintf(['Open-loop-based lower bound (CC) and Monte-Carlo simulation ',...
                  '(%1.0e particles): %1.3f, %1.3f\n'],...
                 n_mcarlo_sims,...
                 optimal_reachAvoid_i_ccc(direction_index_to_plot),...
                 sum(mcarlo_result)/n_mcarlo_sims);
-savefig(gcf,'MATLAB_figs/CWH_example_Figure4b.fig','compact');
-saveas(gcf,'MATLAB_figs/CWH_example_Figure4b.png');
+            
+% savefig(gcf,'MATLAB_figs/CWH_example_Figure4b.fig','compact');
+% saveas(gcf,'MATLAB_figs/CWH_example_Figure4b.png');

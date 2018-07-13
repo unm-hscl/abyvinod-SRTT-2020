@@ -1,23 +1,26 @@
 clear
-close all
 % dropboxpath='D:/Dropbox';
+% fontSize=20;
 dropboxpath='/datafiles/Dropbox';
+fontSize=30;
 % Run CWH_example with Figure3=0
 load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/Figure4_8.mat'),...
     'safe_set','target_set','xmax_ccc','xmax_ft','slice_at_vx_vy',...
+    'elapsed_time_polytope_genzps','elapsed_time_polytope_ccc',...
     'underapproximate_stochastic_reach_avoid_polytope_2D_ccc',...
     'underapproximate_stochastic_reach_avoid_polytope_2D_ft');
+fprintf('CCC: %1.2f\n',elapsed_time_polytope_ccc)
+fprintf('FT: %1.2f\n',elapsed_time_polytope_genzps)
 
 figure(100);
 clf
 hold on;
 plot(safe_set.slice([3,4], slice_at_vx_vy), 'color', 'y');
 plot(target_set.slice([3,4], slice_at_vx_vy), 'color', 'k');
-
 plot(underapproximate_stochastic_reach_avoid_polytope_2D_ft,...
      'color','b','alpha',1);
 plot(underapproximate_stochastic_reach_avoid_polytope_2D_ccc,...
-     'color','m','alpha',0.6);
+     'color','m','alpha',0.8);
 scatter(xmax_ft(1), xmax_ft(2), 100,'gs','filled')
 scatter(xmax_ccc(1), xmax_ccc(2), 100,'ws','filled','MarkerEdgeColor','k')
 leg=legend({'Safe set',...
@@ -26,18 +29,21 @@ leg=legend({'Safe set',...
         'Chance constraint',...
         '$\bar{x}_\mathrm{max}$ (Fourier tran.)',...
         '$\bar{x}_\mathrm{max}$ (Chance const.)'});
-set(leg,'Location','South','interpreter','latex');
+set(leg,'Location','EastOutside','interpreter','latex');
 xlabel('x')
 ylabel('y')
 axis equal;
-box on;
 grid on;
 axis equal
-set(gca,'FontSize',20)
-axis([-1 -0.8 -1.2 -0.85])
+set(gca,'FontSize',fontSize)
+axis([-1 -0.8 -1.125 -0.85])
+box on;
 set(leg,'Orientation','Vertical');
-savefig(gcf,'MATLAB_figs/CWH_example_Figure4a.fig','compact');
-saveas(gcf,'MATLAB_figs/CWH_example_Figure4a.png');
+
+% savefig(gcf,'MATLAB_figs/CWH_example_Figure4a.fig','compact');
+% saveas(gcf,'MATLAB_figs/CWH_example_Figure4a.png');
+
+%% Kendra's code
 % load('D:/Dropbox/MatFiles/2018TAC_Verification/Lesser_CCC_original.mat','x01','x02','Prob','timeSpent')
 % caxis([0 1])
 % colormap_matrix = colormap('copper');
