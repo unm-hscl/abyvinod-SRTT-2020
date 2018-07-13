@@ -34,9 +34,11 @@ else
     ss_grid = SpaceGrid([-1, -1], [1, 1], 40);
     in_grid = InputGrid(-1, 1, 20);
 
+    timer_DP=tic;
     grid_probability = getDynProgSolForTargetTube(sys, ...
         ss_grid, in_grid, target_tube_with_tZero);
-
+    elapsed_time_DP = toc(timer_DP);
+    
     %% Computation of an underapproximative stochastic reach-avoid set
     target_tube = TargetTube('viability',safe_set, time_horizon);
     init_safe_set = safe_set;
@@ -63,7 +65,8 @@ else
     end
     save('DP_grid.mat','grid_probability', 'sys', 'ss_grid', 'in_grid', 'target_tube_with_tZero',...
     'underapproximate_stochastic_reach_avoid_polytope_ccc','elapsed_time_polytope_ccc', ...
-    'target_tube', 'init_safe_set', 'prob_thresh_of_interest', 'set_of_direction_vectors_ccc');
+    'target_tube', 'init_safe_set', 'prob_thresh_of_interest', 'set_of_direction_vectors_ccc',...
+    'elapsed_time_DP');
 end
 
 %% Surf plots
