@@ -2,7 +2,7 @@ clear
 clc
 close all
 
-load('DP_grid.mat');
+load('DI_example.mat');
 
 fontSize=40;
 
@@ -76,3 +76,8 @@ leg=legend('Dynamic programming','Underapprox. interpolation','Open loop underap
 set(leg,'Location','EastOutside');
 savefig(gcf,'MATLAB_figs/DI_example_Figure2.fig','compact');
 saveas(gcf,'MATLAB_figs/DI_example_Figure2.png');
+
+elapsed_time_DP_total
+elapsed_time_interp_DP
+elapsed_time_polytope_ccc
+elapsed_time_interp

@@ -7,36 +7,32 @@ time_horizon = 5;
 alpha_vec = [0.6 0.85 0.9];
 no_of_direction_vectors_ccc = 32;
 
-% define the system
-sys = LtiSystem('StateMatrix', [1, T; 0, 1], ...
-    'InputMatrix', [T^2/2; T], ...
-    'InputSpace', Polyhedron('lb', -0.1, 'ub', 0.1), ...
-    'DisturbanceMatrix', eye(2), ...
-    'Disturbance', StochasticDisturbance('Gaussian', zeros(2,1), 0.01*eye(2)));
+%% System definition
+n_intg = 2;
+umax = 0.1;
+xmax = [1,1];
+dist_cov = 0.01;
+sys = getChainOfIntegLtiSystem(n_intg, T, Polyhedron('lb',-umax,'ub',umax),...
+        RandomVector('Gaussian', zeros(n_intg,1), dist_cov * eye(n_intg)));
+
 %% Setup the target tube
 % safe set definition
-safe_set = Polyhedron('lb', [-1, -1], 'ub', [1, 1]);
-% target set definition
-target_set = Polyhedron('lb', [-0.5, -0.5], 'ub', [0.5, 0.5]);
+safe_set = Polyhedron('lb', -xmax, 'ub', xmax);
 % target tube definiton
-target_tube_with_tZero = TargetTube('viability', safe_set, time_horizon);
+target_tube = TargetTube('viability', safe_set, time_horizon);
 
 %% Dynamic programming recursion via gridding
 % For dynamic programming, we need to create a grid over which we will perform 
 % the recursion
-%%
 % need to create a state space grid and input space grid
-ss_grid = SpaceGrid([-1, -1], [1, 1], 41);
-in_grid = InputGrid(-1, 1, 5);
+ss_grid = SpaceGrid(-xmax, xmax, 40+1);
+in_grid = InputGrid(-umax, umax, 5+1); %round(2*umax/0.05)+1);
 
 timer_DP=tic;
-grid_probability = getDynProgSolForTargetTube(sys, ...
-    ss_grid, in_grid, target_tube_with_tZero);
+grid_probability = getDynProgSolForTargetTube(sys, ss_grid,in_grid,target_tube);
 elapsed_time_DP_recursion = toc(timer_DP);
 
 %% Computation of an underapproximative stochastic reach-avoid set
-target_tube = TargetTube('viability',safe_set, time_horizon);
-init_safe_set = safe_set;
 theta_vector_ccc = linspace(0, 2*pi, no_of_direction_vectors_ccc+1);
 theta_vector_ccc = theta_vector_ccc(1:end-1);
 set_of_direction_vectors_ccc = [cos(theta_vector_ccc); 
@@ -51,7 +47,7 @@ for prob_thresh_of_interest = alpha_vec
     underapproximate_stochastic_reach_avoid_polytope_ccc(i) = getUnderapproxStochReachAvoidSet(...
         sys, ...
         target_tube, ...
-        init_safe_set, ...
+        [], ...
         prob_thresh_of_interest, ...
         set_of_direction_vectors_ccc,...
         'ccc');
@@ -105,23 +101,7 @@ ylabel('y')
 set(gca,'FontSize',fontSize);
 axis([-1-(x(2)-x(1)) 1+(x(2)-x(1)) -1-(y(2)-y(1)) 1+(y(2)-y(1))]);
 
-%% Interpolate DP and DP
-timer_DP_set = tic;
-[C_DP]=contourc(x_ext, y_ext, grid_probability_mat_ext, alpha_vec([1,3]));
-elapsed_time_DP_set = toc(timer_DP_set);
-elapsed_time_DP_total = elapsed_time_DP_recursion + elapsed_time_DP_set;
-vertices_DP_below = max(-1,min(1,C_DP(:,2:length(C_DP)/2)));
-vertices_DP_above = max(-1,min(1,C_DP(:,length(C_DP)/2+2:end)));
-poly_DP_above = Polyhedron('V',vertices_DP_above');
-poly_DP_below = Polyhedron('V',vertices_DP_below');
-timer_interp_DP = tic;
-interp_set_DP = interpStochReachAvoidSet(...
-    alpha_vec(2),...
-    poly_DP_above,...        
-    alpha_vec(3),...
-    poly_DP_below,...        
-    alpha_vec(1));
-elapsed_time_interp_DP = toc(timer_interp_DP);
+%% OL interpolation
 timer_interp = tic;
 interp_set = interpStochReachAvoidSet(...
     alpha_vec(2),...
@@ -130,6 +110,24 @@ interp_set = interpStochReachAvoidSet(...
     underapproximate_stochastic_reach_avoid_polytope_ccc(1),...        
     alpha_vec(1));
 elapsed_time_interp = toc(timer_interp);
+%% DP interpolation
+timer_DP_set = tic;
+[C_DP]=contourc(x_ext, y_ext, grid_probability_mat_ext, alpha_vec([1,3]));
+elapsed_time_DP_set = toc(timer_DP_set);
+elapsed_time_DP_total = elapsed_time_DP_recursion + elapsed_time_DP_set;
+vertices_DP_below = max(-1,min(1,C_DP(:,2:C_DP(2,1)+1)));
+vertices_DP_above = max(-1,min(1,C_DP(:,C_DP(2,1)+3:end)));
+poly_DP_above = Polyhedron('V',vertices_DP_above');
+poly_DP_below = Polyhedron('V',vertices_DP_below');
+figure();plot(poly_DP_below);hold on;plot(poly_DP_above,'color','b');
+timer_interp_DP = tic;
+interp_set_DP = interpStochReachAvoidSet(...
+    alpha_vec(2),...
+    poly_DP_above,...        
+    alpha_vec(3),...
+    poly_DP_below,...        
+    alpha_vec(1));
+elapsed_time_interp_DP = toc(timer_interp_DP);
 
 %% Save all the data
 save('DI_example.mat');
