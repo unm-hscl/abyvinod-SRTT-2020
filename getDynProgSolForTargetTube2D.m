@@ -73,20 +73,21 @@ function [prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc, targ
     end
     xmax = max(vertices_target_sets);
     xmin = min(vertices_target_sets);
+    
     if sys.state_dim == 1
-        x1vec = xmin(1)+x_inc/2:x_inc:xmax(1)-x_inc/2,xmax(1);
+        x1vec = xmin(1)-x_inc/2:x_inc:xmax(1)+x_inc/2;
 %         x1vec = xmin(1):x_inc:xmax(1);
         grid_x = allcomb(x1vec);
     elseif sys.state_dim == 2
-        x1vec = xmin(1)+x_inc/2:x_inc:xmax(1)-x_inc/2;
-        x2vec = xmin(2)+x_inc/2:x_inc:xmax(2)-x_inc/2;
+        x1vec = xmin(1)-x_inc/2:x_inc:xmax(1)+x_inc/2;
+        x2vec = xmin(2)-x_inc/2:x_inc:xmax(2)+x_inc/2;
 %         x1vec = xmin(1):x_inc:xmax(1);
 %         x2vec = xmin(2):x_inc:xmax(2);
         grid_x = allcomb(x1vec,x2vec);
     elseif sys.state_dim == 3
-        x1vec = xmin(1)+x_inc/2:x_inc:xmax(1)-x_inc/2;
-        x2vec = xmin(2)+x_inc/2:x_inc:xmax(2)-x_inc/2;
-        x3vec = xmin(3)+x_inc/2:x_inc:xmax(3)-x_inc/2;
+        x1vec = xmin(1)-x_inc/2:x_inc:xmax(1)+x_inc/2;
+        x2vec = xmin(2)-x_inc/2:x_inc:xmax(2)+x_inc/2;
+        x3vec = xmin(3)-x_inc/2:x_inc:xmax(3)+x_inc/2;
 %         x1vec = xmin(1):x_inc:xmax(1);
 %         x2vec = xmin(2):x_inc:xmax(2);
 %         x3vec = xmin(3):x_inc:xmax(3);
@@ -134,6 +135,11 @@ function transition_prob = getTransProb(sys, grid_x, grid_u)
     
     % \int 1_Box(0,0.5) dx = 1 => \sum\sum delta_x = 1 => delta_x = 1/N^2
     % where N is the number of points of grid_x within the unit box.
+    xmax = max(grid_x);
+    xmin = min(grid_x);
+    if min(xmax)<0.5 || max(xmin)>-0.5
+        throwAsCaller(SrtInvalidArgsError('Delta_x computation made invalid since unit box not contained in the grid.'));
+    end
     box_corner = 0.5;
     N_in_box = sum(Polyhedron('lb',-box_corner*ones(sys.state_dim,1),'ub',box_corner*ones(sys.state_dim,1)).contains(grid_x'));
     delta_x = (2*box_corner)^sys.state_dim/N_in_box;
