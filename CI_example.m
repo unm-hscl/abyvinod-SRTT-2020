@@ -5,7 +5,7 @@ close all
 fontSize=40;
 sampling_time = 0.25;                           % sampling time
 time_horizon = 5;
-alpha_vec = [0.9];
+alpha_vec = [0.6 0.85 0.9];
 no_of_direction_vectors_ccc = 8;
 
 %% System definition
