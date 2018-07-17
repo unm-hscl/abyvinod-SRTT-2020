@@ -14,7 +14,7 @@ clear
 clc
 close all
 
-figure3 = 1;  % Setting this to one will do initial velocity of zero
+figure3 = 0;  % Setting this to one will do initial velocity of zero
               % Setting this to zero will do initial velocity of 0.01
 savefig_true = 0;
 
@@ -234,7 +234,8 @@ concat_state_realization = generateMonteCarloSims(...
     time_horizon,...
     input_vec);
 % Check if the location is within the target_set or not
-mcarlo_result = target_tube.contains(concat_state_realization);
+mcarlo_result = target_tube.contains([repmat(init_state,1,n_mcarlo_sims);
+                                      concat_state_realization]);
 % Plot n_sims_to_plot number of trajectories
 green_legend_updated = 0;
 red_legend_updated = 0;
