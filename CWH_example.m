@@ -161,6 +161,7 @@ else
     underapproximate_stochastic_reach_avoid_polytope_2D_ft = Polyhedron();
 end
 
+save('CWH_example.mat');
 %% Plot the underapproximative polytope along with the safe and the target sets.
 % Assuming only vx-vy is fixed
 figure(100);
