@@ -3,9 +3,38 @@ clc
 clear
 
 load('DubinsCar_example.mat');
+legend_loc = 'EastOutside';
 
 fontSize = 20;
 direction_index_to_plot = 7;
+
+
+%% Plot the set
+figure(101);
+clf;
+hold on;
+for itt=0:time_horizon
+    if itt==0
+        % Remember the first the tube
+        h_target_tube=plot(target_tube_cell{1},'alpha',0.5,'color','y');
+    else
+        plot(target_tube_cell{itt+1},'alpha',0.08,'LineStyle',':','color','y');
+    end            
+end
+axis equal        
+h_poly = plot(underapproximate_stochastic_reach_avoid_polytope_ccc,'color','m');
+h_xmax = scatter(xmax_ccc(1), xmax_ccc(2), 100,'ws','filled','MarkerEdgeColor','k');
+xlabel('x');
+ylabel('y');
+axis equal
+% axis (1.2*[-box_halflength box_halflength -box_halflength box_halflength]);
+axis(axis_vec);
+box on;
+set(gca,'FontSize',fontSize);
+legend_cell = {'Target set at $t=0$','Chance const.', '$\bar{x}_\mathrm{max}$ (Chance const.)'};
+legend([h_target_tube, h_poly, h_xmax], legend_cell, 'Location', legend_loc, 'interpreter','latex');
+savefig(gcf,'MATLAB_figs/DubinsCar_example_set.fig','compact');
+saveas(gcf,'MATLAB_figs/DubinsCar_example_set.png');
 
 %% Plot the trajectories
 polyt = underapproximate_stochastic_reach_avoid_polytope_ccc;
