@@ -4,16 +4,9 @@ fontSize=20;
 % dropboxpath='/datafiles/Dropbox';
 % fontSize=30;
 % Run CWH_example with Figure3=0
-load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/Figure4_8.mat'),...
-    'safe_set','target_set','xmax_ccc','xmax_ft','slice_at_vx_vy',...
-    'vertex_poly_ccc','vertex_poly_ft','optimal_input_vector_at_boundary_points_ccc',...
-    'elapsed_time_polytope_genzps','elapsed_time_polytope_ccc',...
-    'optimal_input_vector_at_boundary_points_ft','optimal_reachAvoid_i_ccc',...
-    'optimal_reachAvoid_i_ft','sys','n_mcarlo_sims','time_horizon',...
-    'target_tube', 'n_sims_to_plot',...
-    'underapproximate_stochastic_reach_avoid_polytope_2D_ccc',...
-    'underapproximate_stochastic_reach_avoid_polytope_2D_ft');
-
+date_str_mat = '20180712_1515XX';%'20180720_141054';%
+load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/CWH_example_',date_str_mat,'_nonzero_vel.mat'));
+direction_index_to_plot = 41;%20;%
 fprintf('CCC: %1.2f\n',elapsed_time_polytope_ccc)
 fprintf('FT: %1.2f\n',elapsed_time_polytope_genzps)
 
@@ -63,7 +56,6 @@ set(leg,'Orientation','Vertical');
 % title(sprintf('Open-loop underapproximative\nstochastic reach-avoid set'));
 
 
-direction_index_to_plot = 41;
 init_state = vertex_poly_ccc(:,direction_index_to_plot);
 %% Plotting a specific one again
 figure(200+direction_index_to_plot)
@@ -82,7 +74,8 @@ concat_state_realization = generateMonteCarloSims(...
     time_horizon,...
     optimal_input_vector_at_boundary_points_ccc(:,direction_index_to_plot));
 % Check if the location is within the target_set or not
-mcarlo_result = target_tube.contains(concat_state_realization);
+mcarlo_result = target_tube.contains([repmat(init_state,1,n_mcarlo_sims);
+                                              concat_state_realization]);
 % Plot n_sims_to_plot number of trajectories
 green_legend_updated = 0;
 red_legend_updated = 0;

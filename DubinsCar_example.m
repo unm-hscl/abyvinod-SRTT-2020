@@ -2,6 +2,12 @@ clear
 close all
 clc
 
+dropboxpath='D:/Dropbox';
+fontSize=20;
+% dropboxpath='/datafiles/Dropbox';
+%fontSize=40;
+save_mat_file_path = strcat(dropboxpath,'/MatFiles/2018TAC_Verification/','DubinsCar_example_',datestr(now,'YYYYmmDD_HHMMSS'),'.mat');
+
 time_horizon = 50;
 time_const = 1/2*time_horizon;
 init_heading = pi/10;
@@ -71,7 +77,7 @@ elapsed_time_polytope_ccc = toc(timer_polytope_ccc);
 fprintf('Time taken for computing the polytope (CCC): %1.3f s\n', elapsed_time_polytope_ccc);
 
 %% Save the data
-save('DubinsCar_example.mat');
+save(save_mat_file_path);
 
 %% Plot the set
 figure(101);

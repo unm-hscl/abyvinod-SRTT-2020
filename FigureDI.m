@@ -2,9 +2,12 @@ clear
 clc
 close all
 
-load('DI_example.mat');
+dropboxpath='D:/Dropbox';
+% dropboxpath='/datafiles/Dropbox';
+load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/DI_example_20185420_130754.mat'));
 
 fontSize=40;
+savefigures = 0;
 
 %% Surf plots
 % figure(1);
@@ -50,9 +53,11 @@ xlabel('$x_1$','interpreter','latex')
 ylabel('$x_2$','interpreter','latex')
 set(gca,'FontSize',fontSize);
 axis(1.1*[-xmax(1) xmax(1) -xmax(2) xmax(2)]);
-% savefig(gcf,'MATLAB_figs/DI_example_Figure1a.fig','compact');
-% saveas(gcf,'MATLAB_figs/DI_example_Figure1a.png');
-
+if savefigures
+    savefig(gcf,'MATLAB_figs/DI_example_FigureDI_a.fig','compact');
+    saveas(gcf,'MATLAB_figs/DI_example_FigureDI_a.png');
+end
+  
 %% Interpolation comparison
 figure(3)
 clf
@@ -78,8 +83,11 @@ axis(1.1*[-xmax(1) xmax(1) -xmax(2) xmax(2)]);
 legend_cell = {'Safe set','Dynamic programming','Underapprox. interpolation','Open loop underapprox.','Underapprox. interpolation'};
 leg=legend([h_safe, h_contour, h_interp_DP, h_OL, h_interp_OL], legend_cell{:});
 set(leg,'Location','EastOutside');
-% savefig(gcf,'MATLAB_figs/DI_example_Figure2.fig','compact');
-% saveas(gcf,'MATLAB_figs/DI_example_Figure2.png');
+if savefigures
+    savefig(gcf,'MATLAB_figs/DI_example_FigureDI_a.fig','compact');
+    saveas(gcf,'MATLAB_figs/DI_example_FigureDI_a.png');
+end
+
 
 elapsed_time_polytope_ccc
 elapsed_time_interp
