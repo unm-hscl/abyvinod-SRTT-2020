@@ -98,7 +98,7 @@ figure(13)
 clf
 hold on
 plot(underapproximate_stochastic_reach_avoid_polytope_ccc(2).slice(n_zeroed+1:n_intg,zeros(n_intg-n_zeroed,1)),'color','b','alpha',0.3);
-plot(interp_set.slice(n_zeroed+1:n_intg,zeros(n_intg-n_zeroed,1)),'color','c','alpha',0.8);
+plot(interp_set.slice(n_zeroed+1:n_intg,zeros(n_intg-n_zeroed,1)),'color','c','alpha',0.6);
 axis equal
 box on
 xlabel('x')

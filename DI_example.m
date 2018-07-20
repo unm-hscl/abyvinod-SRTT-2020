@@ -1,7 +1,12 @@
 clear
 clc
 
-fontSize=40;
+dropboxpath='D:/Dropbox';
+fontSize=20;
+% dropboxpath='/datafiles/Dropbox';
+%fontSize=40;
+save_mat_file_path = strcat(dropboxpath,'/MatFiles/2018TAC_Verification/','DI_example_',datestr(now,'YYYYmmDD_HHMMSS'),'.mat');
+
 sampling_time = 0.1;                           % sampling time
 time_horizon = 10;
 alpha_vec = [0.6 0.85 0.9];
@@ -146,7 +151,7 @@ interp_set_DP = interpStochReachAvoidSet(...
 elapsed_time_interp_DP = toc(timer_interp_DP);
 
 %% Save all the data
-save('DI_example.mat');
+save(save_mat_file_path);
     
 %% Interpolation comparison
 figure(3)
@@ -164,8 +169,7 @@ box on
 xlabel('x')
 ylabel('y')
 set(gca,'FontSize',fontSize);
-% axis([-1-(x(2)-x(1)) 1+(x(2)-x(1)) -1-(y(2)-y(1)) 1+(y(2)-y(1))]);
-axis([grid_x(1,:),grid_x(1,end)]);
+axis([grid_x(1,1), grid_x(end,1) grid_x(1,2) grid_x(end,2)]);
 leg=legend('Dyn. prog.','Interpolation','Open-loop','Interpolation');
 set(leg,'Location','EastOutside');
 

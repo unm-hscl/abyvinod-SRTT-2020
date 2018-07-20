@@ -14,19 +14,31 @@ clear
 clc
 close all
 
-figure3 = 0;  % Setting this to one will do initial velocity of zero
+dropboxpath='D:/Dropbox';
+fontSize=20;
+% dropboxpath='/datafiles/Dropbox';
+%fontSize=40;
+
+figure3 = 1;  % Setting this to one will do initial velocity of zero
               % Setting this to zero will do initial velocity of 0.01
-savefig_true = 0;
 
 %% Dynamics model for the deputy relative to the chief spacecraft
 if figure3
+    % OPTION 1: Initial velocity is zero
+    slice_at_vx_vy = zeros(2,1);                 % Initial velocities of interest
     umax=0.1;
     figsave_str = 'zero';
     direction_index_to_plot = 21;
+    disp('Running zero initial velocity case');
+    save_mat_file_path = strcat(dropboxpath,'/MatFiles/2018TAC_Verification/','CWH_example_',datestr(now,'YYYYmmDD_HHMMSS'),'_zero_vel.mat');
 else
+    % OPTION 2: Initial velocity is non-zero
+    slice_at_vx_vy = 0.01*ones(2,1);             % The initial velocities of interest
     umax = 0.01;
     figsave_str = 'nonzero';
     direction_index_to_plot = 11;
+    disp('Running non-zero initial velocity case');
+    save_mat_file_path = strcat(dropboxpath,'/MatFiles/2018TAC_Verification/','CWH_example_',datestr(now,'YYYYmmDD_HHMMSS'),'_nonzero_vel.mat');
 end
 mean_disturbance = zeros(4,1);
 covariance_disturbance = diag([1e-4, 1e-4, 5e-8, 5e-8]);
@@ -44,7 +56,7 @@ time_horizon=5;          % Stay within a line of sight cone for 4 time steps and
                          % reach the target at t=5
                          % Safe Set --- LoS cone
 probability_threshold_of_interest = 0.8;     % Probability threshold of interest
-no_of_direction_vectors_ccc = 64;  % Increase for a tighter polytopic representation 
+no_of_direction_vectors_ccc = 32;  % Increase for a tighter polytopic representation 
                                    % at the cost of higher computation time
 no_of_direction_vectors_ft = 8;  % Increase for a tighter polytopic representation 
                                  % at the cost of higher computation time
@@ -80,14 +92,6 @@ target_set = Polyhedron('lb', [-0.1; -0.1; -0.01; -0.01],...
 % Target tube definition
 target_tube = TargetTube('reach-avoid', safe_set, target_set, time_horizon);
 
-
-if figure3
-    % OPTION 1: Initial velocity is zero
-    slice_at_vx_vy = zeros(2,1);                 % Initial velocities of interest
-else
-    % OPTION 2: Initial velocity is non-zero
-    slice_at_vx_vy = 0.01*ones(2,1);             % The initial velocities of interest
-end
 % Construct the set of direction vectors
 theta_vector_ccc = linspace(0, 2*pi, no_of_direction_vectors_ccc+1);
 theta_vector_ccc = theta_vector_ccc(1:end-1);
@@ -161,7 +165,8 @@ else
     underapproximate_stochastic_reach_avoid_polytope_2D_ft = Polyhedron();
 end
 
-save('CWH_example.mat');
+save(save_mat_file_path);
+
 %% Plot the underapproximative polytope along with the safe and the target sets.
 % Assuming only vx-vy is fixed
 figure(100);
@@ -194,10 +199,7 @@ else
     axis([-1 -0.8 -1.2 -0.9])
     set(leg,'Orientation','Vertical');
 end
-if savefig_true
-    savefig(gcf,strcat(['MATLAB_figs/CWH_example_',figsave_str,'_initial_vel.fig']),'compact')
-    saveas(gcf,strcat(['MATLAB_figs/CWH_example_',figsave_str,'_initial_vel.png']))
-end
+
 % load('D:/Dropbox/MatFiles/2018HSCC/Lesser_CCC_original.mat','x01','x02','Prob','timeSpent')
 % caxis([0 1])
 % colormap_matrix = colormap('copper');
@@ -310,12 +312,3 @@ fprintf(['Open-loop-based lower bound and Monte-Carlo simulation ',...
                 n_mcarlo_sims,...
                 opt_reach_avoid,...
                 sum(mcarlo_result)/n_mcarlo_sims);
-%% Save fig
-if savefig_true
-    savefig(gcf,strcat(['MATLAB_figs/CWH_example_',figsave_str,'_initial_vel_MCarlo.fig']),'compact')
-    saveas(gcf,strcat(['MATLAB_figs/CWH_example_',figsave_str,'_initial_vel_MCarlo.png']))
-end
-
-%theta_vector = [pi/4, pi/2, 3*pi/4,...
-                %linspace(pi, 5/4*pi, floor(no_of_direction_vectors-3)/2),...
-                %-pi/2 , linspace(-pi/4, 0,floor(no_of_direction_vectors-3)/2)];

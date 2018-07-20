@@ -2,11 +2,15 @@ close all
 clc
 clear
 
-load('DubinsCar_example.mat');
-legend_loc = 'EastOutside';
+dropboxpath='D:/Dropbox';
+fontSize=20;
+% dropboxpath='/datafiles/Dropbox';
+% fontSize=30;
+date_str_mat = '20180720_152823';
+load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/DubinsCar_example_',date_str_mat,'.mat'));
 
-fontSize = 20;
 direction_index_to_plot = 7;
+legend_loc = 'EastOutside';
 
 
 %% Plot the set
@@ -163,5 +167,5 @@ if ~isEmptySet(polyt)
 %     end
 end
 
-savefig(gcf,'MATLAB_figs/DubinsCar_example.fig','compact');
-saveas(gcf,'MATLAB_figs/DubinsCar_example.png');
+% savefig(gcf,'MATLAB_figs/DubinsCar_example.fig','compact');
+% saveas(gcf,'MATLAB_figs/DubinsCar_example.png');
