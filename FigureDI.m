@@ -32,44 +32,54 @@ grid_probability_mat_ext(2:end-1,2:end-1)=grid_probability_mat;
 figure(2);
 clf
 hold on
-color_string = ['g','g','y'];
+color_string = ['b','g','g'];
+plot(safe_set,'color','y');
 for i=1:2:length(alpha_vec)
     plot(underapproximate_stochastic_reach_avoid_polytope_ccc(i),'color',color_string(i),'alpha',1);
 end
 [c,h]=contour(x_ext, x_ext, grid_probability_mat_ext, alpha_vec([1,3]),'LineWidth',3);
+fprintf('Choose contours and set 0.9 label colors to white\n');
 clabel(c,h,'manual','FontSize',2*fontSize/3);
+% clabel(c,h,'FontSize',2*fontSize/3);
 colorbar
-colormap parula;
+colormap winter;
 caxis([0 1]);
 axis equal
 box on
 xlabel('$x_1$','interpreter','latex')
 ylabel('$x_2$','interpreter','latex')
 set(gca,'FontSize',fontSize);
-axis([-xmax(1) xmax(1) -xmax(2) xmax(2)]);
-savefig(gcf,'MATLAB_figs/DI_example_Figure1a.fig','compact');
-saveas(gcf,'MATLAB_figs/DI_example_Figure1a.png');
+axis(1.1*[-xmax(1) xmax(1) -xmax(2) xmax(2)]);
+% savefig(gcf,'MATLAB_figs/DI_example_Figure1a.fig','compact');
+% saveas(gcf,'MATLAB_figs/DI_example_Figure1a.png');
 
 %% Interpolation comparison
 figure(3)
 clf
 hold on
+h_safe = plot(safe_set,'color','y');
 C_DP_middle = contourc(x_ext, x_ext, grid_probability_mat_ext, [alpha_vec(2) alpha_vec(2)]);
 poly_DP_middle = Polyhedron('V',max(-1,min(1,C_DP_middle(:,2:end)))');
-plot(poly_DP_middle,'color','k','alpha',1);
-plot(interp_set_DP,'color','w','alpha',1);
-plot(underapproximate_stochastic_reach_avoid_polytope_ccc(2),'color','b','alpha',1);
-plot(interp_set,'color','c','alpha',1);
+% plot(poly_DP_middle,'color','k','alpha',1);
+[c,h_contour]=contour(x_ext, x_ext, grid_probability_mat_ext, alpha_vec([2,2]),'LineWidth',3);
+% clabel(c,h_contour,'FontSize',2*fontSize/3);
+h_interp_DP = plot(interp_set_DP,'color','g','alpha',0.5);
+plot(interp_set_DP,'color','b','alpha',0.3);
+h_OL = plot(underapproximate_stochastic_reach_avoid_polytope_ccc(2),'color','m','alpha',1);
+h_interp_OL = plot(interp_set,'color','c','alpha',1);
+fprintf('Choose contours and set 0.9 label colors to white\n');
+clabel(c,h_contour,'manual','FontSize',2*fontSize/3);
 axis equal
 box on
 xlabel('$x_1$','interpreter','latex')
 ylabel('$x_2$','interpreter','latex')
 set(gca,'FontSize',fontSize);
-axis([-xmax(1) xmax(1) -xmax(2) xmax(2)]);
-leg=legend('Dynamic programming','Underapprox. interpolation','Open loop underapprox.','Underapprox. interpolation');
+axis(1.1*[-xmax(1) xmax(1) -xmax(2) xmax(2)]);
+legend_cell = {'Safe set','Dynamic programming','Underapprox. interpolation','Open loop underapprox.','Underapprox. interpolation'};
+leg=legend([h_safe, h_contour, h_interp_DP, h_OL, h_interp_OL], legend_cell{:});
 set(leg,'Location','EastOutside');
-savefig(gcf,'MATLAB_figs/DI_example_Figure2.fig','compact');
-saveas(gcf,'MATLAB_figs/DI_example_Figure2.png');
+% savefig(gcf,'MATLAB_figs/DI_example_Figure2.fig','compact');
+% saveas(gcf,'MATLAB_figs/DI_example_Figure2.png');
 
 elapsed_time_polytope_ccc
 elapsed_time_interp
