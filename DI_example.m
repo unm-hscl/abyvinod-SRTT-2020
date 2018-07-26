@@ -74,10 +74,16 @@ for prob_thresh_of_interest = alpha_vec
 end
 
 x_ext = [x(1) - (x(2)-x(1)), x', x(end) + (x(2)-x(1))]';
-grid_probability_mat = reshape(prob_x, length(x),[]);
-grid_probability_mat_ext =...
-    zeros(size(grid_probability_mat,1)+2,size(grid_probability_mat,2)+2);
-grid_probability_mat_ext(2:end-1,2:end-1)=grid_probability_mat;
+timer_DP_set = tic;
+[poly_array, grid_probability_mat] = getDynProgLevelSets(x, prob_x, alpha_vec);
+vertices_DP_below = poly_array(1).V;
+vertices_DP_above = poly_array(3).V;
+elapsed_time_DP_set = toc(timer_DP_set);
+elapsed_time_DP_total = elapsed_time_DP_recursion + elapsed_time_DP_set;
+
+% grid_probability_mat_ext =...
+%     zeros(size(grid_probability_mat,1)+2,size(grid_probability_mat,2)+2);
+% grid_probability_mat_ext(2:end-1,2:end-1)=grid_probability_mat;
 
 %% Open-loop underapproximation
 figure(2);
@@ -88,7 +94,7 @@ for i=1:2:length(alpha_vec)
     plot(underapproximate_stochastic_reach_avoid_polytope_ccc(i),...
         'color',color_string(i),'alpha',1);
 end
-contour(x_ext, x_ext, grid_probability_mat_ext, alpha_vec([1,3]),'LineWidth',3);
+contour(x, x, grid_probability_mat, alpha_vec([1,3]),'LineWidth',3);
 colorbar
 colormap parula;
 caxis([0.5 1]);
@@ -109,21 +115,12 @@ interp_set = interpStochReachAvoidSet(...
     alpha_vec(1));
 elapsed_time_interp = toc(timer_interp);
 
-%% DP interpolation
-timer_DP_set = tic;
-[C_DP]=contourc(x_ext, x_ext, grid_probability_mat_ext, alpha_vec([1,3]));
-elapsed_time_DP_set = toc(timer_DP_set);
-elapsed_time_DP_total = elapsed_time_DP_recursion + elapsed_time_DP_set;
-vertices_DP_below = max(-1,min(1,C_DP(:,2:C_DP(2,1)+1)));
-vertices_DP_above = max(-1,min(1,C_DP(:,C_DP(2,1)+3:end)));
-poly_DP_above = Polyhedron('V',vertices_DP_above');
-poly_DP_below = Polyhedron('V',vertices_DP_below');
-timer_interp_DP = tic;
+
 interp_set_DP = interpStochReachAvoidSet(...
     alpha_vec(2),...
-    poly_DP_above,...        
+    poly_array(3),...        
     alpha_vec(3),...
-    poly_DP_below,...        
+    poly_array(1),...               
     alpha_vec(1));
 elapsed_time_interp_DP = toc(timer_interp_DP);
 
@@ -134,7 +131,8 @@ save(save_mat_file_path);
 figure(3)
 clf
 hold on
-C_DP_middle = contourc(x_ext, x_ext, grid_probability_mat_ext, [alpha_vec(2) alpha_vec(2)]);
+% C_DP_middle = contourc(x_ext, x_ext, grid_probability_mat_ext, [alpha_vec(2) alpha_vec(2)]);
+C_DP_middle = contourc(x, x, grid_probability_mat, [alpha_vec(2) alpha_vec(2)]);
 poly_DP_middle = Polyhedron('V',max(-1,min(1,C_DP_middle(:,2:end)))');
 plot(poly_DP_middle,'color','r','alpha',0.8);
 plot(interp_set_DP,'color','m','alpha',0.8);
