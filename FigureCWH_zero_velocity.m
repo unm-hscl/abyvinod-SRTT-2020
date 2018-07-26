@@ -1,13 +1,32 @@
 clear
+clc
+close all
+
+date_str_mat = '20180712_1533XX'; %20180720_144954
 dropboxpath='D:/Dropbox';
-fontSize=20;
-% dropboxpath='/datafiles/Dropbox';
-% fontSize=40;
-% Run CWH_example with Figure3=1
-date_str_mat = '20180712_1533XX';%'20180720_144954';%
+if exist(dropboxpath,'file') == 0
+    warning('Switching the file name to Linux Dropbox.');
+    dropboxpath='/datafiles/Dropbox';
+    if exist(dropboxpath,'file') == 0
+        warning('Searching for the mat files here.');
+        dropboxpath = '.';
+    end    
+end
 load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/CWH_example_',date_str_mat,'_zero_vel.mat'));
+if exist(dropboxpath,'file') == 0
+    warning('Switching the file name to Linux Dropbox.');
+    dropboxpath='/datafiles/Dropbox';
+    if exist(dropboxpath,'file') == 0
+        warning('Searching for the mat files here.');
+        dropboxpath = '.';
+    end    
+end
 load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/cwh_save.mat'),'DsetTemp');
+
+fontSize=20;
 direction_index_to_plot = 46;%20;%
+savefigures = 0;
+
 fprintf('CCC: %1.2f\n',elapsed_time_polytope_ccc)
 fprintf('FT: %1.2f\n',elapsed_time_polytope_genzps)
 
@@ -40,8 +59,10 @@ grid on;
 axis equal
 set(gca,'FontSize',fontSize)
 axis([-2.5 2.5 -2 0]);
-% savefig(gcf,strcat(['MATLAB_figs/CWH_example_',figsave_str,'_initial_vel.fig']),'compact')
-% saveas(gcf,strcat(['MATLAB_figs/CWH_example_',figsave_str,'_initial_vel.png']))
+if savefigures
+    savefig(gcf,'MATLAB_figs/CWH_example_ZeroInitVel.fig','compact')
+    saveas(gcf,'MATLAB_figs/CWH_example_ZeroInitVel.png')
+end
 
 %% Plotting a specific one again
 init_state = vertex_poly_ccc(:,direction_index_to_plot);
@@ -142,5 +163,7 @@ fprintf(['Open-loop-based lower bound (CC) and Monte-Carlo simulation ',...
                 optimal_reachAvoid_i_ccc(direction_index_to_plot),...
                 sum(mcarlo_result)/n_mcarlo_sims);           
 
-% savefig(gcf,'MATLAB_figs/CWH_example_Figure3a.fig','compact');
-% saveas(gcf,'MATLAB_figs/CWH_example_Figure3a.png');
+if savefigures
+    savefig(gcf,'MATLAB_figs/CWH_example_ZeroInitVel_traj.fig','compact')
+    saveas(gcf,'MATLAB_figs/CWH_example_ZeroInitVel_traj.png')
+end

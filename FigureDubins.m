@@ -2,16 +2,21 @@ close all
 clc
 clear
 
-dropboxpath='D:/Dropbox';
-fontSize=20;
-% dropboxpath='/datafiles/Dropbox';
-% fontSize=30;
 date_str_mat = '20180720_152823';
+dropboxpath='D:/Dropbox';
+if exist(dropboxpath,'file') == 0
+    warning('Switching the file name to Linux Dropbox.');
+    dropboxpath='/datafiles/Dropbox';
+    if exist(dropboxpath,'file') == 0
+        warning('Searching for the mat files here.');
+        dropboxpath = '.';
+    end    
+end
 load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/DubinsCar_example_',date_str_mat,'.mat'));
 
 direction_index_to_plot = 7;
 legend_loc = 'EastOutside';
-
+savefigures = 0;
 
 %% Plot the set
 figure(101);
@@ -27,6 +32,7 @@ for itt=0:time_horizon
 end
 axis equal        
 h_poly = plot(underapproximate_stochastic_reach_avoid_polytope_ccc,'color','m');
+h_nominal_traj=scatter(center_box(1,:), center_box(2,:), 50,'ks','filled');        
 h_xmax = scatter(xmax_ccc(1), xmax_ccc(2), 100,'ws','filled','MarkerEdgeColor','k');
 xlabel('x');
 ylabel('y');
@@ -35,10 +41,12 @@ axis equal
 axis(axis_vec);
 box on;
 set(gca,'FontSize',fontSize);
-legend_cell = {'Target set at $t=0$','Chance const.', '$\bar{x}_\mathrm{max}$ (Chance const.)'};
-legend([h_target_tube, h_poly, h_xmax], legend_cell, 'Location', legend_loc, 'interpreter','latex');
-savefig(gcf,'MATLAB_figs/DubinsCar_example_set.fig','compact');
-saveas(gcf,'MATLAB_figs/DubinsCar_example_set.png');
+legend_cell = {'Target tube','Chance const.', 'Nominal trajectory', '$\bar{x}_\mathrm{max}$ (Chance const.)'};
+legend([h_target_tube, h_poly, h_nominal_traj,  h_xmax], legend_cell, 'Location', legend_loc, 'interpreter','latex');
+if savefigures
+    savefig(gcf,'MATLAB_figs/DubinsCar_example_set.fig','compact');
+    saveas(gcf,'MATLAB_figs/DubinsCar_example_set.png');
+end
 
 %% Plot the trajectories
 polyt = underapproximate_stochastic_reach_avoid_polytope_ccc;
@@ -62,10 +70,9 @@ if ~isEmptySet(polyt)
         end
         axis equal        
         h_underapprox=plot(polyt, 'color','m','alpha',0.8);
-        h_nominal_traj=scatter(center_box(1,:), center_box(2,:), 50,'ks','filled');
         h_init_state=scatter(init_state(1), init_state(2), 200,'cs','filled');
-        legend_cell = {'Target tube','Chance const.','Nominal trajectory','Initial state'};
-        %%
+        h_nominal_traj=scatter(center_box(1,:), center_box(2,:), 50,'ks','filled');        
+        legend_cell = {'Initial state'};
         concat_state_realization = generateMonteCarloSims(...
             n_mcarlo_sims,...
             sys,...
@@ -148,9 +155,9 @@ if ~isEmptySet(polyt)
               30, 'bo', 'filled');
         legend_cell{end+1} = 'Mean trajectory';
         if red_legend_updated
-            leg = legend([h_target_tube,h_underapprox,h_nominal_traj,h_init_state,h_good_traj,h_bad_traj,h_opt_mean], legend_cell{:},'Location',legend_loc);%,'interpreter','latex');
+            leg = legend([h_init_state,h_good_traj,h_bad_traj,h_opt_mean], legend_cell{:},'Location',legend_loc);%,'interpreter','latex');
         else
-            leg = legend([h_target_tube,h_underapprox,h_nominal_traj,h_init_state,h_good_traj,h_opt_mean], legend_cell{:},'Location',legend_loc);%,'interpreter','latex');
+            leg = legend([h_init_state,h_good_traj,h_opt_mean], legend_cell{:},'Location',legend_loc);%,'interpreter','latex');
         end
         box on;
         grid on;
@@ -166,6 +173,7 @@ if ~isEmptySet(polyt)
                         sum(mcarlo_result)/n_mcarlo_sims);
 %     end
 end
-
-% savefig(gcf,'MATLAB_figs/DubinsCar_example.fig','compact');
-% saveas(gcf,'MATLAB_figs/DubinsCar_example.png');
+if savefigures
+    savefig(gcf,'MATLAB_figs/DubinsCar_example.fig','compact');
+    saveas(gcf,'MATLAB_figs/DubinsCar_example.png');
+end

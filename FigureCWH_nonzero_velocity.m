@@ -1,12 +1,32 @@
 clear
-dropboxpath='D:/Dropbox';
-fontSize=20;
-% dropboxpath='/datafiles/Dropbox';
-% fontSize=30;
-% Run CWH_example with Figure3=0
+clc
+close all
+
 date_str_mat = '20180712_1515XX';%'20180720_141054';%
+dropboxpath='D:/Dropbox';
+if exist(dropboxpath,'file') == 0
+    warning('Switching the file name to Linux Dropbox.');
+    dropboxpath='/datafiles/Dropbox';
+    if exist(dropboxpath,'file') == 0
+        warning('Searching for the mat files here.');
+        dropboxpath = '.';
+    end    
+end
 load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/CWH_example_',date_str_mat,'_nonzero_vel.mat'));
+if exist(dropboxpath,'file') == 0
+    warning('Switching the file name to Linux Dropbox.');
+    dropboxpath='/datafiles/Dropbox';
+    if exist(dropboxpath,'file') == 0
+        warning('Searching for the mat files here.');
+        dropboxpath = '.';
+    end    
+end
+load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/cwh_save.mat'),'DsetTemp');
+
+fontSize=20;
 direction_index_to_plot = 41;%20;%
+savefigures = 0;
+
 fprintf('CCC: %1.2f\n',elapsed_time_polytope_ccc)
 fprintf('FT: %1.2f\n',elapsed_time_polytope_genzps)
 
@@ -39,9 +59,10 @@ axis([-1 -0.8 -1.125 -0.85])
 box on;
 set(leg,'Orientation','Vertical');
 
-% savefig(gcf,'MATLAB_figs/CWH_example_Figure4a.fig','compact');
-% saveas(gcf,'MATLAB_figs/CWH_example_Figure4a.png');
-
+if savefigures
+    savefig(gcf,'MATLAB_figs/CWH_example_NonZeroInitVel.fig','compact')
+    saveas(gcf,'MATLAB_figs/CWH_example_NonZeroInitVel.png')
+end
 %% Kendra's code
 % load('D:/Dropbox/MatFiles/2018TAC_Verification/Lesser_CCC_original.mat','x01','x02','Prob','timeSpent')
 % caxis([0 1])
@@ -155,5 +176,7 @@ fprintf(['Open-loop-based lower bound (CC) and Monte-Carlo simulation ',...
                 optimal_reachAvoid_i_ccc(direction_index_to_plot),...
                 sum(mcarlo_result)/n_mcarlo_sims);
             
-% savefig(gcf,'MATLAB_figs/CWH_example_Figure4b.fig','compact');
-% saveas(gcf,'MATLAB_figs/CWH_example_Figure4b.png');
+if savefigures
+    savefig(gcf,'MATLAB_figs/CWH_example_NonZeroInitVel_traj.fig','compact')
+    saveas(gcf,'MATLAB_figs/CWH_example_NonZeroInitVel_traj.png')
+end

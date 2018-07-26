@@ -1,4 +1,5 @@
-function [prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc, target_tube)
+function [prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc,...
+    target_tube)
 % SReachTools/stochasticReachAvoid/getDynProgSolForTargetTube Get dynamic 
 % programming grid probability for reachability of target tube
 % ============================================================================
@@ -19,16 +20,18 @@ function [prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc, targ
 % ============================================================================
 %
 % grid_prob = getDynProgSolForTargetTube(sys, ...
-%     state_grid, input_grid, target_tube, varargin)
+%     state_grid,...
+%     input_grid,...
+%     target_tube,...
+%     varargin)
 % 
 % Inputs:
 % -------
 %   sys         - LtiSystem object
 %   state_grid  - SpaceGrid object
 %   input_grid  - InputGrid object
-%   target_tube
-%               - Target tube of length N+1 where N is the time_horizon. It should have
-%                   polyhedrons T_0, T_1,...,T_N.
+%   target_tube - Target tube of length N+1 where N is the time_horizon. It
+%                 should have polyhedrons T_0, T_1,...,T_N.
 %
 % Outputs:
 % --------
@@ -55,17 +58,29 @@ function [prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc, targ
     % check inputs
     validateattributes(sys, {'LtiSystem'}, {'nonempty'})
     validateattributes(target_tube, {'TargetTube'}, {'nonempty'});
-    
+    validateattributes(x_inc, {'numeric'}, {'scalar'});
+    validateattributes(u_inc, {'numeric'}, {'scalar'});
     validateattributes(sys.dist, {'RandomVector', 'StochasticDisturbance'}, ...
         {'nonempty'});
     if ~strcmpi(sys.dist.type, 'Gaussian')
         throwAsCaller(SrtInvalidArgsError('Handles only Gaussian disturbances'));
     end
+    % In order to go to hypercuboid, we will have to identify the edges
+    % correctly. Currently a simple 2^-no_of_active_dims is used.
+    w_txt= sprintf(['In order to keep the code simple, this approach ',...
+        ' handles up to 3-dimensional systems with target tubes and input ',...
+        'space (not necessarily identical) anywhere-centered axis-aligned ',...
+        'hypercubes.\nThis is why scalar x_inc and u_inc are requested.\n',...
+        'For hypercuboids, please transform your states and/or inputs ',...
+        'accordingly.\nFrom here on, we will assume that the sets provided',...
+        'are accurate.']);
+    warning(w_txt); 
     
     % n_targets is time_horizon + 1
     n_targets = length(target_tube);
 
-    % Computation of corners
+    % Compute corners for gridding ==> Get corners of the largest target set in
+    % target_tube
     vertices_target_sets = [];
     for itt = 1:n_targets
         vertices_target_sets = [vertices_target_sets;
@@ -73,30 +88,31 @@ function [prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc, targ
     end
     xmax = max(vertices_target_sets);
     xmin = min(vertices_target_sets);
-    
+
+
     if sys.state_dim == 1
-        x1vec = xmin(1)-x_inc/2:x_inc:xmax(1)+x_inc/2;
-%         x1vec = xmin(1):x_inc:xmax(1);
+        x1vec = xmin(1):x_inc:xmax(1);
         grid_x = allcomb(x1vec);
     elseif sys.state_dim == 2
-        x1vec = xmin(1)-x_inc/2:x_inc:xmax(1)+x_inc/2;
-        x2vec = xmin(2)-x_inc/2:x_inc:xmax(2)+x_inc/2;
-%         x1vec = xmin(1):x_inc:xmax(1);
-%         x2vec = xmin(2):x_inc:xmax(2);
+        x1vec = xmin(1):x_inc:xmax(1);
+        x2vec = xmin(2):x_inc:xmax(2);
         grid_x = allcomb(x1vec,x2vec);
     elseif sys.state_dim == 3
-        x1vec = xmin(1)-x_inc/2:x_inc:xmax(1)+x_inc/2;
-        x2vec = xmin(2)-x_inc/2:x_inc:xmax(2)+x_inc/2;
-        x3vec = xmin(3)-x_inc/2:x_inc:xmax(3)+x_inc/2;
-%         x1vec = xmin(1):x_inc:xmax(1);
-%         x2vec = xmin(2):x_inc:xmax(2);
-%         x3vec = xmin(3):x_inc:xmax(3);
+        x1vec = xmin(1):x_inc:xmax(1);
+        x2vec = xmin(2):x_inc:xmax(2);
+        x3vec = xmin(3):x_inc:xmax(3);
         grid_x = allcomb(x1vec,x2vec,x3vec);        
     else
         throwAsCaller(SrtInvalidArgsError('System can have at most 3 states'));
     end
-    
     n_grid_x = length(grid_x);
+    
+    %% Invoking trapezoid rule, we need to penalize 1/2 per dimension for the
+    %% endpoints
+    % max to implement OR and sum to count how many active dimensions
+    n_active_dims = max(sum(grid_x == xmin,2),sum(grid_x == xmax,2));
+    fraction_at_grid = 2.^(-n_active_dims);        
+    delta_x_grid = (x_inc^sys.state_dim).* fraction_at_grid;
     
     % Input gridding
     umax = max(sys.input_space.V);
@@ -104,19 +120,21 @@ function [prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc, targ
     if sys.input_dim == 1
         grid_u = allcomb(umin(1):u_inc:umax(1));
     elseif sys.input_dim == 2
-        grid_u = allcomb(umin(1):u_inc:umax(1),umin(2):u_inc:umax(2));
+        grid_u = allcomb(umin(1):u_inc:umax(1),...
+                         umin(2):u_inc:umax(2));
     elseif sys.input_dim == 3
-        grid_u = allcomb(umin(1):u_inc:umax(1),umin(2):u_inc:umax(2),umin(3):u_inc:umax(3));
+        grid_u = allcomb(umin(1):u_inc:umax(1),...
+                         umin(2):u_inc:umax(2),...
+                         umin(3):u_inc:umax(3));
     else
         throwAsCaller(SrtInvalidArgsError('System can have at most 3 inputs'));
     end
-    
     
     fprintf('Set optimal value function at t=%d\n',n_targets-1);    
     terminal_indicator_x = target_tube(n_targets).contains(grid_x');
     prob_x = terminal_indicator_x;
     
-    transition_prob = getTransProb(sys, grid_x, grid_u);
+    transition_prob = getTransProb(sys, grid_x, grid_u, delta_x_grid);
     for itt = n_targets - 1:-1:1
         fprintf('Compute optimal value function at t=%d\n', itt - 1);
         old_prob_x = prob_x;
@@ -128,21 +146,10 @@ function [prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc, targ
     end
 end
 
-function transition_prob = getTransProb(sys, grid_x, grid_u)
+function transition_prob = getTransProb(sys, grid_x, grid_u, delta_x_grid)
 
     % Define transition_prob as a cell array
     transition_prob = cell(length(grid_x),1);
-    
-    % \int 1_Box(0,0.5) dx = 1 => \sum\sum delta_x = 1 => delta_x = 1/N^2
-    % where N is the number of points of grid_x within the unit box.
-    xmax = max(grid_x);
-    xmin = min(grid_x);
-    if min(xmax)<0.5 || max(xmin)>-0.5
-        throwAsCaller(SrtInvalidArgsError('Delta_x computation made invalid since unit box not contained in the grid.'));
-    end
-    box_corner = 0.5;
-    N_in_box = sum(Polyhedron('lb',-box_corner*ones(sys.state_dim,1),'ub',box_corner*ones(sys.state_dim,1)).contains(grid_x'));
-    delta_x = (2*box_corner)^sys.state_dim/N_in_box;
     
     n_grid_x = length(grid_x);
     dist_cov = sys.state_mat * sys.dist.parameters.covariance * sys.state_mat';            
@@ -157,8 +164,11 @@ function transition_prob = getTransProb(sys, grid_x, grid_u)
     for ix = 1:n_grid_x
         transition_prob{ix} = zeros(length(grid_u), length(grid_x));
         for iu = 1:length(grid_u)
-            dist_mean = sys.state_mat * grid_x(ix,:)' + sys.input_mat * grid_u(iu,:) + sys.dist_mat * sys.dist.parameters.mean;
-            transition_prob{ix}(iu,:) = mvnpdf(grid_x, dist_mean', dist_cov)' * delta_x;
+            dist_mean = sys.state_mat * grid_x(ix,:)' +...
+                sys.input_mat * grid_u(iu,:) +...
+                sys.dist_mat * sys.dist.parameters.mean;
+            transition_prob{ix}(iu,:) = mvnpdf(grid_x, dist_mean', dist_cov)'...
+                .* delta_x_grid';
         end
         if ix > print_marker(print_marker_indx)
             val = (print_marker_indx-1) * print_marker_val;

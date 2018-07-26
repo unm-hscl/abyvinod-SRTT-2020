@@ -3,11 +3,18 @@ clc
 close all
 
 dropboxpath='D:/Dropbox';
-% dropboxpath='/datafiles/Dropbox';
-load(strcat(dropboxpath,'/MatFiles/2018TAC_Verification/DI_example_20185420_130754.mat'));
-
-fontSize=40;
+if exist(dropboxpath,'file') == 0
+    warning('Switching the file name to Linux Dropbox.');
+    dropboxpath='/datafiles/Dropbox';
+    if exist(dropboxpath,'file') == 0
+        warning('Searching for the mat files here.');
+        dropboxpath = '.';
+    end    
+end
+date_str_mat = '20180721_191802';
+load(strcat(dropboxpath,strcat('/MatFiles/2018TAC_Verification/DI_example_',date_str_mat,'.mat')));
 savefigures = 0;
+fontSize=20;
 
 %% Surf plots
 % figure(1);
@@ -42,7 +49,7 @@ for i=1:2:length(alpha_vec)
 end
 [c,h]=contour(x_ext, x_ext, grid_probability_mat_ext, alpha_vec([1,3]),'LineWidth',3);
 fprintf('Choose contours and set 0.9 label colors to white\n');
-clabel(c,h,'manual','FontSize',2*fontSize/3);
+clabel(c,h,'manual','FontSize',fontSize,'color','m');
 % clabel(c,h,'FontSize',2*fontSize/3);
 colorbar
 colormap winter;
@@ -73,7 +80,7 @@ plot(interp_set_DP,'color','b','alpha',0.3);
 h_OL = plot(underapproximate_stochastic_reach_avoid_polytope_ccc(2),'color','m','alpha',1);
 h_interp_OL = plot(interp_set,'color','c','alpha',1);
 fprintf('Choose contours and set 0.9 label colors to white\n');
-clabel(c,h_contour,'manual','FontSize',2*fontSize/3);
+clabel(c,h_contour,'manual','FontSize',fontSize,'color','k');
 axis equal
 box on
 xlabel('$x_1$','interpreter','latex')
@@ -84,8 +91,8 @@ legend_cell = {'Safe set','Dynamic programming','Underapprox. interpolation','Op
 leg=legend([h_safe, h_contour, h_interp_DP, h_OL, h_interp_OL], legend_cell{:});
 set(leg,'Location','EastOutside');
 if savefigures
-    savefig(gcf,'MATLAB_figs/DI_example_FigureDI_a.fig','compact');
-    saveas(gcf,'MATLAB_figs/DI_example_FigureDI_a.png');
+    savefig(gcf,'MATLAB_figs/DI_example_FigureDI_b.fig','compact');
+    saveas(gcf,'MATLAB_figs/DI_example_FigureDI_b.png');
 end
 
 
