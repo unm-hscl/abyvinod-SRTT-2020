@@ -81,10 +81,6 @@ vertices_DP_above = poly_array(3).V;
 elapsed_time_DP_set = toc(timer_DP_set);
 elapsed_time_DP_total = elapsed_time_DP_recursion + elapsed_time_DP_set;
 
-% grid_probability_mat_ext =...
-%     zeros(size(grid_probability_mat,1)+2,size(grid_probability_mat,2)+2);
-% grid_probability_mat_ext(2:end-1,2:end-1)=grid_probability_mat;
-
 %% Open-loop underapproximation
 figure(2);
 clf
@@ -114,8 +110,7 @@ interp_set = interpStochReachAvoidSet(...
     underapproximate_stochastic_reach_avoid_polytope_ccc(1),...        
     alpha_vec(1));
 elapsed_time_interp = toc(timer_interp);
-
-
+%% DL interpolation
 interp_set_DP = interpStochReachAvoidSet(...
     alpha_vec(2),...
     poly_array(3),...        
