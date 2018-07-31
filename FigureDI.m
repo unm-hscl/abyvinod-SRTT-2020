@@ -12,7 +12,8 @@ if exist(dropboxpath,'file') == 0
     end    
 end
 date_str_mat = '20180726_140648';%'20180721_191802';
-load(strcat(dropboxpath,strcat('/MatFiles/2018TAC_Verification/DI_example_',date_str_mat,'.mat')));
+% load(strcat(dropboxpath,strcat('/MatFiles/2018TAC_Verification/DI_example_',date_str_mat,'.mat')));
+load('test.mat')
 savefigures = 0;
 fontSize=20;
 
@@ -65,7 +66,7 @@ xlabel('$x_1$','interpreter','latex')
 ylabel('$x_2$','interpreter','latex')
 set(gca,'FontSize',fontSize);
 axis(1.1*[-xmax(1) xmax(1) -xmax(2) xmax(2)]);
-legend_cell = {'Safe set','Dynamic programming','Underapprox. interpolation','Open loop underapprox.','Underapprox. interpolation'};
+legend_cell = {'Safe set','Dynamic programming','Interpolation (Thm. 5)','Open loop underapprox.','Interpolation (Prop. 6d)'};
 leg=legend([h_safe, h_contour, h_interp_DP, h_OL, h_interp_OL], legend_cell{:});
 set(leg,'Location','EastOutside');
 if savefigures

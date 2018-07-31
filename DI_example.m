@@ -13,8 +13,9 @@ if exist(dropboxpath,'file') == 0
         fontSize=20;
     end    
 end
-save_mat_file_path = strcat(dropboxpath,'/MatFiles/2018TAC_Verification/',...
-    'DI_example_',datestr(now,'YYYYmmDD_HHMMSS'),'.mat');
+% save_mat_file_path = strcat(dropboxpath,'/MatFiles/2018TAC_Verification/',...
+%     'DI_example_',datestr(now,'YYYYmmDD_HHMMSS'),'.mat');
+save_mat_file_path = 'test.mat';
 
 sampling_time = 0.1;                           % sampling time
 time_horizon = 10;
@@ -76,8 +77,6 @@ end
 x_ext = [x(1) - (x(2)-x(1)), x', x(end) + (x(2)-x(1))]';
 timer_DP_set = tic;
 [poly_array, grid_probability_mat] = getDynProgLevelSets(x, prob_x, alpha_vec);
-vertices_DP_below = poly_array(1).V;
-vertices_DP_above = poly_array(3).V;
 elapsed_time_DP_set = toc(timer_DP_set);
 elapsed_time_DP_total = elapsed_time_DP_recursion + elapsed_time_DP_set;
 
@@ -101,6 +100,15 @@ set(gca,'FontSize',fontSize);
 axis([x_ext(1) x_ext(end) x_ext(1) x_ext(end)]);
 axis equal
 
+%% DL interpolation
+timer_interp_DP=tic;
+interp_set_DP = interpStochReachAvoidSet(...
+    alpha_vec(2),...
+    poly_array(3),...        
+    alpha_vec(3),...
+    poly_array(1),...               
+    alpha_vec(1));
+elapsed_time_interp_DP = toc(timer_interp_DP);
 %% OL interpolation
 timer_interp = tic;
 interp_set = interpStochReachAvoidSet(...
@@ -110,14 +118,6 @@ interp_set = interpStochReachAvoidSet(...
     underapproximate_stochastic_reach_avoid_polytope_ccc(1),...        
     alpha_vec(1));
 elapsed_time_interp = toc(timer_interp);
-%% DL interpolation
-interp_set_DP = interpStochReachAvoidSet(...
-    alpha_vec(2),...
-    poly_array(3),...        
-    alpha_vec(3),...
-    poly_array(1),...               
-    alpha_vec(1));
-elapsed_time_interp_DP = toc(timer_interp_DP);
 
 %% Save all the data
 save(save_mat_file_path);

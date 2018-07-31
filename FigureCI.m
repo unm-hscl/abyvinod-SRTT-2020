@@ -14,7 +14,7 @@ end
 date_str_mat = '20180719_1024XX';
 load(strcat(dropboxpath,strcat('/MatFiles/2018TAC_Verification/CI_example_',date_str_mat,'.mat')));
 fontSize=20;
-savefigures = 1;
+savefigures = 0;
 
 %% Open-loop underapproximation
 figure(2);
