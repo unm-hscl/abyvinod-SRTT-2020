@@ -1,4 +1,4 @@
-function [prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc,...
+function [prob_x, grid_x, varargout] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc,...
     target_tube)
 % SReachTools/stochasticReachAvoid/getDynProgSolForTargetTube Get dynamic 
 % programming grid probability for reachability of target tube
@@ -92,7 +92,7 @@ function [prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc,...
 
     if sys.state_dim == 1
         x1vec = xmin(1):x_inc:xmax(1);
-        grid_x = allcomb(x1vec);
+        grid_x = x1vec';
     elseif sys.state_dim == 2
         x1vec = xmin(1):x_inc:xmax(1);
         x2vec = xmin(2):x_inc:xmax(2);
@@ -132,18 +132,22 @@ function [prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, x_inc, u_inc,...
     
     fprintf('Set optimal value function at t=%d\n',n_targets-1);    
     terminal_indicator_x = target_tube(n_targets).contains(grid_x');
-    prob_x = terminal_indicator_x;
+
+    % Initialize
+    mat_prob_x = zeros(n_targets, length(grid_x)); 
+    mat_prob_x(n_targets,:) = terminal_indicator_x;
     
     transition_prob = getTransProb(sys, grid_x, grid_u, delta_x_grid);
     for itt = n_targets - 1:-1:1
         fprintf('Compute optimal value function at t=%d\n', itt - 1);
-        old_prob_x = prob_x;
+        old_prob_x = mat_prob_x(itt+1,:);
         current_indicator_x = target_tube(itt).contains(grid_x');
-        prob_x = zeros(1,n_grid_x);
         for ix = find(current_indicator_x==1)
-            prob_x(ix) = max(old_prob_x*transition_prob{ix}');
+            mat_prob_x(itt,ix) = max(old_prob_x*transition_prob{ix}');
         end        
     end
+    prob_x = mat_prob_x(1,:);
+    varargout{1} = mat_prob_x;
 end
 
 function transition_prob = getTransProb(sys, grid_x, grid_u, delta_x_grid)
@@ -156,7 +160,12 @@ function transition_prob = getTransProb(sys, grid_x, grid_u, delta_x_grid)
     fprintf('Compute transition probability...000%%');
     
     % For printing stuff --- Create fixed markers in the index space
-    print_marker = linspace(1,n_grid_x,100+1);
+    if n_grid_x < 100
+        no_of_splits = 10;
+    else
+        no_of_splits = 100;
+    end
+    print_marker = linspace(1,n_grid_x,no_of_splits+1);
     print_marker(end) = print_marker(end)-1;
     print_marker_indx = 1;
     print_marker_val = (print_marker(2)-print_marker(1))/n_grid_x*100;
@@ -176,5 +185,6 @@ function transition_prob = getTransProb(sys, grid_x, grid_u, delta_x_grid)
             print_marker_indx = print_marker_indx + 1;
         end
     end
+    fprintf('\b\b\b\b%3d%%', 100)
     fprintf('\n');
 end
