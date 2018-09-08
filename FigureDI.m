@@ -17,6 +17,7 @@ load('test.mat')
 savefigures = 0;
 fontSize=20;
 
+grid_probability_mat = reshape(prob_x, length(x),[]);
 %% Open-loop underapproximation
 figure(2);
 clf
@@ -49,9 +50,6 @@ figure(3)
 clf
 hold on
 h_safe = plot(safe_set,'color','y');
-C_DP_middle = contourc(x, x, grid_probability_mat, [alpha_vec(2) alpha_vec(2)]);
-poly_DP_middle = Polyhedron('V',max(-1,min(1,C_DP_middle(:,2:end)))');
-% plot(poly_DP_middle,'color','k','alpha',1);
 [c,h_contour]=contour(x, x, grid_probability_mat, alpha_vec([2,2]),'LineWidth',3);
 % clabel(c,h_contour,'FontSize',2*fontSize/3);
 h_interp_DP = plot(interp_set_DP,'color','g','alpha',0.5);

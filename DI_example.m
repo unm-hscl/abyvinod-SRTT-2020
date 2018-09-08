@@ -21,6 +21,8 @@ sampling_time = 0.1;                           % sampling time
 time_horizon = 10;
 alpha_vec = [0.6 0.85 0.9];
 no_of_direction_vectors_ccc = 32;
+dyn_prog_xinc = 0.05;
+dyn_prog_uinc = 0.05;
 
 %% System definition
 n_intg = 2;
@@ -45,9 +47,9 @@ target_tube = TargetTube('viability', safe_set, time_horizon);
     
 
 timer_DP=tic;
-[prob_x, grid_x] = getDynProgSolForTargetTube2D(sys, 0.05, 0.05, target_tube);
+[prob_x, cell_of_xvecs] = getDynProgSolForTargetTube(sys, dyn_prog_xinc, dyn_prog_uinc, target_tube);
 elapsed_time_DP_recursion = toc(timer_DP);
-x=grid_x(1:sqrt(length(grid_x)),2);
+x = cell_of_xvecs{1};
 %% Computation of an underapproximative stochastic reach-avoid set
 theta_vector_ccc = linspace(0, 2*pi, no_of_direction_vectors_ccc+1);
 theta_vector_ccc = theta_vector_ccc(1:end-1);
@@ -74,9 +76,8 @@ for prob_thresh_of_interest = alpha_vec
     i = i+1;
 end
 
-x_ext = [x(1) - (x(2)-x(1)), x', x(end) + (x(2)-x(1))]';
 timer_DP_set = tic;
-[poly_array, grid_probability_mat] = getDynProgLevelSets(x, prob_x, alpha_vec);
+poly_array = getDynProgLevelSets2D(cell_of_xvecs, prob_x, alpha_vec, target_tube);
 elapsed_time_DP_set = toc(timer_DP_set);
 elapsed_time_DP_total = elapsed_time_DP_recursion + elapsed_time_DP_set;
 
@@ -89,7 +90,7 @@ for i=1:2:length(alpha_vec)
     plot(underapproximate_stochastic_reach_avoid_polytope_ccc(i),...
         'color',color_string(i),'alpha',1);
 end
-contour(x, x, grid_probability_mat, alpha_vec([1,3]),'LineWidth',3);
+contour(x, x, reshape(prob_x, length(x),[]), alpha_vec([1,3]),'LineWidth',3);
 colorbar
 colormap parula;
 caxis([0.5 1]);
@@ -97,7 +98,7 @@ box on
 xlabel('x')
 ylabel('y')
 set(gca,'FontSize',fontSize);
-axis([x_ext(1) x_ext(end) x_ext(1) x_ext(end)]);
+axis([x(1) x(end) x(1) x(end)]);
 axis equal
 
 %% DL interpolation
@@ -126,10 +127,7 @@ save(save_mat_file_path);
 figure(3)
 clf
 hold on
-% C_DP_middle = contourc(x_ext, x_ext, grid_probability_mat_ext, [alpha_vec(2) alpha_vec(2)]);
-C_DP_middle = contourc(x, x, grid_probability_mat, [alpha_vec(2) alpha_vec(2)]);
-poly_DP_middle = Polyhedron('V',max(-1,min(1,C_DP_middle(:,2:end)))');
-plot(poly_DP_middle,'color','r','alpha',0.8);
+plot(poly_array(2),'color','r','alpha',0.8);
 plot(interp_set_DP,'color','m','alpha',0.8);
 plot(underapproximate_stochastic_reach_avoid_polytope_ccc(2),'color',color_string(2),'alpha',1);
 plot(interp_set,'color','b','alpha',0.8);
@@ -138,7 +136,7 @@ box on
 xlabel('x')
 ylabel('y')
 set(gca,'FontSize',fontSize);
-axis([x_ext(1) x_ext(end) x_ext(1) x_ext(end)]);
+axis([x(1) x(end) x(1) x(end)]);
 
 leg=legend('Dyn. prog.','Interpolation','Open-loop','Interpolation');
 set(leg,'Location','EastOutside');
