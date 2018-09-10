@@ -13,7 +13,7 @@ if exist(dropboxpath,'file') == 0
 end
 date_str_mat = '20180726_140648';%'20180721_191802';
 % load(strcat(dropboxpath,strcat('/MatFiles/2018TAC_Verification/DI_example_',date_str_mat,'.mat')));
-load('test.mat')
+load('testDI.mat')
 savefigures = 0;
 fontSize=20;
 

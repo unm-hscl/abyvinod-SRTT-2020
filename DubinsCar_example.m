@@ -7,6 +7,7 @@ fontSize=20;
 % dropboxpath='/datafiles/Dropbox';
 %fontSize=40;
 save_mat_file_path = strcat(dropboxpath,'/MatFiles/2018TAC_Verification/','DubinsCar_example_',datestr(now,'YYYYmmDD_HHMMSS'),'.mat');
+save_mat_file_path = 'testDubins.mat';
 
 time_horizon = 50;
 time_const = 1/2*time_horizon;

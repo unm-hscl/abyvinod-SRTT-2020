@@ -15,13 +15,13 @@ if exist(dropboxpath,'file') == 0
 end
 % save_mat_file_path = strcat(dropboxpath,'/MatFiles/2018TAC_Verification/',...
 %     'DI_example_',datestr(now,'YYYYmmDD_HHMMSS'),'.mat');
-save_mat_file_path = 'test.mat';
+save_mat_file_path = 'testDI.mat';
 
 sampling_time = 0.1;                           % sampling time
 time_horizon = 10;
 alpha_vec = [0.6 0.85 0.9];
 no_of_direction_vectors_ccc = 32;
-dyn_prog_xinc = 0.05;
+dyn_prog_xinc = 0.1;
 dyn_prog_uinc = 0.05;
 
 %% System definition
