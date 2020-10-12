@@ -1,0 +1,6 @@
+[submodule "SReachTools"]
+	path = SReachTools
+	url = git@github.com:sreachtools/SReachTools.git
+[submodule "stochy"]
+	path = stochy
+	url = https://github.com/abyvinod/stochy.git
